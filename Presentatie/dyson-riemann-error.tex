@@ -1,0 +1,121 @@
+\documentclass{article}
+
+\usepackage[a4paper, total={7in, 10.5in}]{geometry}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[square,numbers]{natbib} 	% Bibliography manager
+\usepackage{amsmath,amssymb}
+\usepackage{bm}% bold math
+\usepackage{braket}
+\usepackage{amsfonts}  % Common math fonts
+\usepackage{mathtools} %pro \dcases
+\usepackage{phaistos}
+\usepackage{xcolor}
+
+\DeclareMathOperator{\sign}{sign}
+\renewcommand{\d}{\mathrm{d}}
+\newcommand{\texp}{\mathcal T \exp}
+
+
+\newcommand{\gray}[1]{\textcolor{gray}{#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\purple}[1]{\textcolor{purple}{#1}}
+\newcommand{\violet}[1]{\textcolor{violet}{#1}}
+
+\title{Riemann integration error for counter-diabatic driving}
+\author{Jan Střeleček}
+\date{\today}
+
+\begin{document}
+\maketitle
+This evaluation of the error induced by Riemann integration is based on \cite{Low2019}. The aim is to implement a similar upper bound for counter-diabatic driving, with Adiabatic potential
+\begin{equation}
+    \hat A_{\eta,a}\blue{(\lambda)}=\frac{1}{2}\purple{\int\limits_{-a}^a}  e^{-\eta |\purple\tau|}\underbrace{\sign{\tau}e^{-i\hat H\blue{(\lambda)} \purple\tau}\partial_{\lambda}\hat H\blue{(\lambda)} e^{i\hat H \blue{(\lambda)}\purple\tau} \purple{\d \tau}}_{G_\eta(\blue\lambda,\purple\tau)}.
+\end{equation}
+We would like to find the upper bound for
+\begin{equation}
+    ||U-U_M^D || \leq ||U-U^D || + ||U^D-U_M^D ||<\epsilon,
+\end{equation}
+where $U=\texp{(-i\int_0^t \hat H(s) \d s)}$ is the exact state evolution, $U^D$ is the Dyson series to order $D$, and $U_M^D$ its Riemann integral using discretization to $M$ pieces.
+
+Here, we are interested in the second part, which is given for general Hamiltonian in Lemma 12 in Appendix A of \cite{Low2019}. Here, we try to modify the proof for counter-diabatic driving, which requires additional integration over the \purple{$\tau$ space}.
+
+First, we find the error for a single hypercube ($d$ dimensions come from \blue{$\lambda$ coordinates} of the Dyson series, where each $\lambda$ direction is obtained using additional integration in \purple{$\tau$ direction}, implementing the counter-diabatic driving. The error from a single hypercube is then multiplied by the number of hyper-cubes over which the Riemann integration is performed. 
+
+\subsubsection{Single hypercube error}
+The error of integration over the single hypercube is
+\begin{equation}
+\begin{split}
+    & \left|\left| \blue{\int\limits_{C_\lambda}} \purple{\int\limits_{C_\tau}} \prod_{i=1}^q G_\eta(\blue{\lambda_i+y_i},\purple{\tau_i+s_i})\blue{\d^q\lambda}\purple{\d^q s} - \blue{\Delta_\lambda^q}\purple{\Delta^q_\tau}\prod_{i=1}^q G_\eta(\blue{\lambda_i},\purple{\tau_i})\right|\right| \\ 
+    &\leq \int\limits_{C_\lambda} \int\limits_{C_\tau} \left|\left| \prod_{i=1}^q G_\eta(\lambda_i+y_i,\tau_i+s_i) - \prod_{i=1}^q G_\eta(\lambda_i,\tau_i)\right|\right|\d^q\lambda\d^q s \\
+    & \overset{(1)}{\leq} \sum_{k=1}^q \int\limits_{C_\lambda}\int\limits_{C_\tau}\left(\prod_{j=1}^{k-1}\left|\left| G_\eta(\lambda_j+y_j,\tau_j+s_j)\right|\right|\right) \left|\left| G_\eta(\lambda_k+y_k,\tau_k+s_k) - G_\eta(\lambda_k,\tau_k)\right|\right| \left(\prod_{j=k+1}^{q}\left|\left| G_\eta(\lambda_j,\tau_j)\right|\right|\right) \d^q y \d^q s \\
+    &\overset{(2)}{\leq} \sum_{k=1}^q \underbrace{\left(\prod_{j=1}^{k-1}\int\limits_0^\Delta\int\limits_0^\Delta\left|\left| G_\eta(\lambda_j+y,\tau_j+s)\right|\right|\d y\d s\right)}_{\blacksquare} \underbrace{\int\limits_0^\Delta\int\limits_0^\Delta\left|\left| G_\eta(\lambda_k+y,\tau_k+s)  - G_\eta(\lambda_k,\tau_k)\right|\right| \d y\d s}_{\blacklozenge} \\
+    & \quad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \underbrace{\left(\prod_{j=k+1}^{q}\int\limits_0^\Delta\int\limits_0^\Delta\left|\left| G_\eta(\lambda_j,\tau_j)\right|\right|\d y\d s\right)}_{\clubsuit}
+    \label{eq:hypercube}
+\end{split}
+\end{equation}
+where we used
+\begin{equation}
+\begin{split}
+    (1)& \left|\left| \prod_{j=1}^q A_j - \prod_{j=1}^q B_j \right|\right| \leq \sum_{k=1}^q \left(\prod_{j=1}^{k-1}\left|\left| A_j\right|\right|\right) \left|\left| A_k-B_k \right|\right| \left(\prod_{j=k+1}^{q}\left|\left| B_j\right|\right|\right) \\
+    (2)& \text{integration over the smallest cube, with choice }\Delta_\tau=\Delta_\lambda
+\end{split}
+\end{equation}
+Using the definition of $G_\eta$ and defining $\alpha\equiv \max_{\lambda\in{[\lambda_i;\lambda_f]}}\left|\left| \partial_\lambda H \right|\right|$, we get
+\begin{equation}
+\begin{split}
+    \blacklozenge &\leq \prod_{j=1}^{k-1}\int\limits_0^\Delta\int\limits_0^\Delta \frac{1}{2} e^{-\eta|\tau_j|}e^{-\eta|s|}\alpha \d y\d s = \prod_{j=1}^{k-1} \frac{\alpha}{2\eta} e^{-\eta|\tau_j|}(1-e^{-\eta \Delta})\int\limits_0^\Delta\d y = \left(\frac{\alpha}{2\eta}(1-e^{-\eta \Delta})  \right)^{k-1}\prod_{j=1}^{k-1} e^{-\eta|\tau_j|} \\
+    &= \left(\frac{\alpha}{2\eta\Delta}(1-e^{-\eta \Delta})  \right)^{k-1}\prod_{j=1}^{k-1} e^{-\eta|\tau_j|} \int\limits_0^\Delta\int\limits_0^\Delta \d y\d s.
+\end{split}
+\end{equation}
+Where in the last step, the integration over $s$ is artificially added. The reason will be clear soon.
+
+To evaluate the second part, we use $||f(x+\delta)-H(x)||\leq \int\limits_0^\delta ||\dot f(x+s)||\d s$, leading to
+\begin{equation}
+\begin{split}
+    \blacksquare & \leq \int\limits_0^\Delta \int\limits_0^\Delta
+    \Big[
+    ||G_\eta(\lambda_k+y,\tau_k+s)-G_\eta(\lambda_k+y,\tau_k)||+||G_\eta(\lambda_k+y,\tau_k)-G_\eta(\lambda_k,\tau_k)||
+    \Big] \d y \d s\\
+    &\leq \int\limits_0^\Delta \int\limits_0^\Delta
+    \left[
+        \int\limits_0^s ||\dot G_\eta(\lambda_k+y,\tau_k+\sigma||\d \sigma +\int\limits_0^y ||\dot G_\eta(\lambda_k+p,\tau_k ||\d p
+    \right] \d y \d s\\
+    &\leq \int\limits_0^\Delta \int\limits_0^\Delta  \Delta
+    \left[ 
+        ||\dot G_\eta(\lambda_k+y,\tau_k+s|| + ||\dot G_\eta(\lambda_k+y,\tau_k||
+    \right]\d y \d s
+\end{split}
+\end{equation}
+
+Similarly to $\blacklozenge$, we have
+\begin{equation}
+    \clubsuit \leq \left(\frac{\alpha}{2} \right)^{q-k-1}\prod_{j=k+1}^q e^{-\eta|\tau_j|}\int\limits_0^\Delta\int\limits_0^\Delta  \d y \d s 
+\end{equation}
+
+Inserting all three parts into Eq. \ref{eq:hypercube}, we get
+\begin{equation}
+   \leq \left(\frac{\alpha}{2}\right)^{q-1} \Delta\sum_{k=1}^q \left(\frac{1-e^{-\eta\Delta}}{\eta\Delta}\right)^{k-1} 
+    \left(
+        \prod_{j\neq k}^q e^{-\eta|\tau_j|}\int\limits_0^\Delta\int\limits_0^\Delta  \d y \d s 
+    \right)
+    \left(
+         \int\limits_0^\Delta \int\limits_0^\Delta 
+    \left[ 
+        ||\dot G_\eta(\lambda_k+y,\tau_k+s|| + ||\dot G_\eta(\lambda_k+y,\tau_k||
+    \right]\d y \d s
+    \right)
+\end{equation}
+\textit{Now this is similar to their equation (A11). If we upperbound some parts, we might get even higher similarity. This I leave to our future selves.}
+Possibilities:
+\begin{align}
+    \left(\frac{1-e^{-\eta\Delta}}{\eta\Delta^2}\right)^{k-1} & \leq \left(\frac{1}{\eta\Delta^2}\right)^{k-1} \\
+    \left(\frac{1-e^{-\eta\Delta}}{\eta\Delta^2}\right)^{k-1} & \overset{?}{\leq}\left(\frac{1-e^{-\eta\Delta}}{\eta\Delta^2}\right)^q\\
+    e^{-\eta|\tau_j|} &\leq const
+\end{align}
+
+\bibliographystyle{plain}
+\bibliography{bib}
+
+\end{document}

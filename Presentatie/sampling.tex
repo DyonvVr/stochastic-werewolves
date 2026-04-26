@@ -1,0 +1,109 @@
+\section{Sampling-based CD}
+The following is a method inspired by the qDRIFT protocol \cite{}. The approach still discretises $\lambda$ space, in that we approximate $\mt U_{\eta, a}$ as a product of unitaries
+\begin{align}
+    \mt U_{\eta, a}(\lambdaf, \lambdai) \approx \tilde{\mt U}_{\eta, a}(\lambdaf, \lambdai) = \prod_{j=1}^r \tilde{\mt U}_{\eta, a}(\lambda_j, \lambda_{j-1})
+\end{align}
+such that $\lambda_j > \lambda_{j-1}$, $\lambda_0 = \lambdai$ and $\lambda_r = \lambdaf$. Contrary to the deterministic approach, the $\tilde{\mt U}_j$ are now sampled according to an appropriate distribution. The idea is based on a Monte Carlo evaluation of the time integral expression for $\mt A_{\eta, a}(\lambda_j)$. In this setting, one would sample
+\begin{align}
+    \mt B_{\eta, a}(\lambda, \tau) = \e^{-\i \mt H(\lambda) \tau} \bigg( \frac{(1 - \e^{-\eta a})\sgn\tau}\eta \partial_\lambda \mt H(\lambda) \bigg) \> \e^{\i \mt H(\lambda) \tau}, \quad P(\tau) = \begin{cases} \frac\eta{2(1 - \e^{-\eta a})} \e^{-\eta|\tau|} & |\tau| \leq a \\ 0 & \text{else}\end{cases}
+\end{align}
+so that the expected value of $\mt B(\lambda, \tau)$ over $\tau$ equals $\mt A_{\eta, a}(\lambda)$. We port this idea to unitary evolution under $\mt A_{\eta, a}(\lambda)$; that is to say, we construct the channel
+\begin{align}
+    \tilde\cU_{\eta, a}(\lambda_j, \lambda_{j-1})(\rhom) = \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \> p(\lambda) \int_{-\infty}^{\infty} \d\tau P(\tau) \, \tilde{\mt U}_{\eta, a}(\lambda, \tau) \> \rhom \> \tilde{\mt U}_{\eta, a}\t(\lambda, \tau)
+\end{align}
+for some distribution $p(\lambda)$ to be specified later, where
+\begin{align}
+    \tilde{\mt U}_{\eta, a}(\lambda, \tau) &= \exp[-\i \mt B_{\eta, a}(\lambda, \tau) / p(\lambda)] \nonumber \\
+    &= \exp[-\i \mt H(\lambda) \tau] \exp \! \bigg[ \!-\!\i \> \frac{(1 - \e^{-\eta a})\sgn\tau}{p(\lambda)\eta} \> \partial_\lambda \mt H(\lambda)\> \bigg] \exp[\i \mt H(\lambda)\tau].
+\end{align}
+
+\begin{lemma}
+The error we now want to bound is
+\begin{align}\label{eq:error_sampling_channel}
+    \bigg\| \, \cU_{\eta, a}(\lambdaf, \lambdai)(\rhom_n(\lambdai)) - \prod_{j=1}^r \tilde\cU_{\eta, a}(\lambda_j, \lambda_{j-1})(\rhom_n(\lambdai)) \bigg\|_1.
+\end{align}
+where $\cU_{\eta, a}(\lambdaf, \lambdai)(\rho) = \mt U_{\eta, a}(\lambdaf, \lambdai) \rhom \mt U_{\eta, a}\t(\lambdaf, \lambdai)$ and the product sign is meant to indicate composition. 
+\end{lemma}
+
+
+\begin{proof}
+In a similar style to eq. \ref{eq:telescoping_proof_12}, one may telescope this error into multiple short-evolution errors:
+\begin{align}
+    \text{(eq. \ref{eq:error_sampling_channel})} \leq \sum_{j=1}^r \|\> \cU_{\eta, a}(\lambda_j, \lambda_{j-1})(\rhom_n(\lambda_{j-1})) - \tilde\cU_{\eta, a}(\lambda_j, \lambda_{j-1})(\rhom_n(\lambda_{j-1}))\|_1.
+\end{align}
+We will now bound each term following a similar strategy to that of Berry et al. \cite{Berry2020}. First we define scaled versions of $\cU_{\eta, a}$ and $\tilde\cU_{\eta, a}$:
+\begin{align}
+    \cU_{\eta, a, s}(\lambda_j, \lambda_{j-1})(\rhom) &= \mt U_{\eta, a, s}(\lambda_j, \lambda_{j-1}) \rhom \mt U_{\eta, a, s}\t(\lambda_j, \lambda_{j-1}), \nonumber \\
+    \mt U_{\eta, a, s}(\lambda_j, \lambda_{j-1}) &= \mathcal T \exp \bigg[ \! -\!\i \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \> s \> \mt A_{\eta, a}(\lambda) \bigg] ; \\[1mm]
+    \tilde\cU_{\eta, a, s}(\lambda_j, \lambda_{j-1})(\rhom) &= \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \> p(\lambda)  \int_{-\infty}^{\infty} \d\tau P(\tau) \, \tilde{\mt U}_{\eta, a, s}(\lambda, \tau) \> \rhom \> \tilde{\mt U}_{\eta, a, s}\t(\lambda, \tau), \nonumber \\
+    \tilde{\mt U}_{\eta, a, s}(\lambda, \tau) &= \exp[-\i \> s \> \mt B_\eta(\lambda, \tau) / p(\lambda)].
+\end{align}
+Since $\cU_{\eta, 0}(\rhom) = \tilde\cU_{\eta, 0}(\rhom) = \rhom$, we may write (dropping the $\lambda_j, \lambda_{j-1}$ arguments for legibility)
+\begin{align}
+    \|\> \cU_{\eta, a}(\rhom_n) - \tilde\cU_{\eta, a}(\rhom_n)\|_1 &= \big\|\> \big\{ \cU_{\eta, 1}(\rhom_n) - \cU_{\eta, 0}(\rhom_n) \big\} - \big\{ \tilde\cU_{\eta, 1}(\rhom_n) - \tilde\cU_{\eta, 0}(\rhom_n) \big\} \big\|_1 \nonumber \\
+    &= \bigg\| \int_0^1 \d s \frac\d{\d s} \big( \> \cU_{\eta, a, s}(\rhom_n) - \tilde\cU_{\eta, a, s}(\rhom_n) \big) \bigg\|.
+\end{align}
+For the derivatives in the last line, we use lemma 6 from Berry et al. \cite{Berry2020},
+\begin{align}
+    \frac\d{\d s} \mt U_{\eta, a, s}(\lambda_j, \lambda_{j-1}) = \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \, \mt U_{\eta, a, s}(\lambda_j, \lambda) [-\i \mt A_{\eta, a}(\lambda)] \mt U_{\eta, a, s}(\lambda, \lambda_{j-1}),
+\end{align}
+and
+\begin{align}
+    \frac\d{\d s} \tilde\cU_{\eta, a, s}(&\lambda_j, \lambda_{j-1})(\rhom) = \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \> p(\lambda) \int_{-a}^a \d\tau \, \frac\eta{2(1 - \e^{-\eta a})} \e^{-\eta|\tau|} \nonumber \\[1mm]
+    &\times \e^{-\i \mt H(\lambda) \tau} \e^{-\i \> (1 - \e^{-\eta a}) \> s \sgn\tau \> \partial_\lambda \mt H(\lambda) / p(\lambda) \eta} \nonumber \\
+    &\times \Big[ \!-\!\<\i \> \frac{(1 - \e^{-\eta a})\sgn\tau}{p(\lambda) \eta} \> \partial_\lambda \mt H(\lambda), \, \e^{\i \mt H(\lambda) \tau} \rhom \, \e^{-\i \mt H(\lambda) \tau} \Big] \nonumber \\
+    &\times \e^{\i \> (1 - \e^{-\eta a}) \> s \sgn\tau \> \partial_\lambda \mt H(\lambda) / p(\lambda) \eta} \e^{\i \mt H(\lambda) \tau}.
+\end{align}
+We observe now that the derivatives of $\cU_{\eta, a, s}$ and $\tilde\cU_{\eta, a, s}$ agree at $s=0$:
+\begin{align}
+    \frac\d{\d s} \cU_{\eta, a, s}(\lambda_j, \lambda_{j-1})(\rhom) \Big|_{s=0} = \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \, [-\i \mt A_{\eta, a}(\lambda), \rhom] = \frac\d{\d s} \tilde\cU_{\eta, a, s}(\lambda_j, \lambda_{j-1})(\rhom) \Big|_{s=0} \, ;
+\end{align}
+hence, we may invoke the fundamental theorem of calculus a second time to express
+\begin{align}
+    \|\> \cU_{\eta, a}(\rhom_n) - \tilde\cU_{\eta, a}(\rhom_n)\|_1 = \bigg\| \int_0^1 \d s \int_0^s \d v \frac{\d^2}{\d v^2} \big( \> \cU_{\eta, a, v}(\rhom_n) - \tilde\cU_{\eta, a, v}(\rhom_n) \big) \bigg\|.
+\end{align}
+We proceed to bound this error following Berry et al. \cite[proof of theorem 5]{Berry2020}:
+\begin{align}\label{eq:sampling_error_proof}
+    \|\> \cU_{\eta, a}(\rhom) - \tilde\cU_{\eta, a}(\rhom)\|_1 &\leq \int_0^1 \d s \int_0^s \d v \, \bigg\{ \Big\| \frac{\d^2}{\d v^2} \mt U_{\eta, a, v} \> \rhom \> \mt U_{\eta, a, v}\t \Big\|_1 + 2 \Big\| \frac\d{\d v} \mt U_{\eta, a, v} \> \rhom \> \frac\d{\d v} \mt U_{\eta, a, v}\t \Big\|_1 + \Big\| \mt U_{\eta, a, v} \> \rhom \> \frac{\d^2}{\d v^2} \mt U_{\eta, a, v}\t \Big\|_1 \nonumber \\
+    &\hspace{6mm} + \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \, p(\lambda) \int_{-\infty}^\infty \d\tau \> P(\tau) \nonumber \\
+    &\hspace{10mm} \times \Big\| \Big[ \!-\!\<\i \> \frac{(1 - \e^{-\eta a})\sgn\tau}{p(\lambda)\eta} \> \partial_\lambda \mt H(\lambda), \, \Big[ \!-\!\<\i \> \frac{(1 - \e^{-\eta a})\sgn\tau}{p(\lambda)\eta} \> \partial_\lambda \mt H(\lambda), \, \e^{\i \mt H(\lambda) \tau} \rhom \, \e^{-\i \mt H(\lambda) \tau} \Big] \Big] \Big\|_1 \bigg\} \nonumber \\
+    &\leq \int_0^1 \d s \int_0^s \d v \, \bigg\{ 4 \bigg( \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \, \|\mt A_{\eta, a}(\lambda)\|\bigg)^2 + 4 \int_{\lambda_{j-1}}^{\lambda_j} \d\lambda \, p(\lambda) \bigg( \frac{(1 - \e^{-\eta a})\|\partial_\lambda \mt H(\lambda)\|}{p(\lambda)\eta} \bigg)^2 \bigg\}.
+\end{align}
+Now from the definition of $\mt A_{\eta, a}$, we find
+\begin{align}
+    \|\mt A_{\eta, a}\| \leq \int_{-a}^a \d\tau \> \frac12\e^{-\eta|\tau|} \|\partial_\lambda \mt H\| = \frac{1 - \e^{-\eta a}}\eta \|\partial_\lambda \mt H\|_{\infty, 1}
+\end{align}
+where $\|\partial_\lambda \mt H\|_{\infty, 1} = \int_\lambdai^\lambdaf \d\lambda \> \|\partial_\lambda \mt H(\lambda)\|$; if we now conveniently choose
+\begin{align}
+    p(\lambda) = \frac{\|\partial_\lambda \mt H(\lambda)\|}{\|\partial_\lambda \mt H\|_{\infty, 1}}
+\end{align}
+then the last line of eq. \ref{eq:sampling_error_proof} reduces to
+\begin{align}
+    \|\> \cU_{\eta, a}(\lambda_j, \lambda_{j-1})(\rhom) - \tilde\cU_{\eta, a}(\lambda_j, \lambda_{j-1})(\rhom)\|_1 \leq \frac{4(1 - \e^{-\eta a})^2}{\eta^2} \|\partial_\lambda \mt H\|_{\infty, 1}^2.
+\end{align}
+Lastly, we can directly follow the proof of theorem 7 from Berry et al. \cite{Berry2020} to show that
+\begin{align}\label{eq:r_for_U_eta,a}
+    r \geq \bigg\lceil \frac{4(1 - \e^{-\eta a})^2}{\eta^2\epsilon} \|\partial_\lambda \mt H\|_{\infty, 1}^2 \bigg\rceil
+\end{align}
+is sufficient to guarantee that the error from eq. \ref{eq:error_sampling_channel} satisfies
+\begin{align}
+    \bigg\| \, \cU_{\eta, a}(\lambdaf, \lambdai)(\rhom_n(\lambdai)) - \prod_{j=1}^r \tilde\cU_{\eta, a}(\lambda_j, \lambda_{j-1})(\rhom_n(\lambdai)) \bigg\|_1 \leq \epsilon.
+\end{align}
+\end{proof}
+
+\begin{theorem}
+Let ...
+\end{theorem}
+
+\begin{proof}
+According to the error analysis above, one should sample and apply a unitary
+\begin{align}
+    \tilde{\mt U}_{\eta, a}(\lambda, \tau) = \exp[-\i \mt H(\lambda) \tau] \exp \! \bigg[ \!-\!\i \> \frac{(1 - \e^{-\eta a})\sgn\tau}{p(\lambda)\eta} \> \partial_\lambda \mt H(\lambda)\> \bigg] \exp[\i \mt H(\lambda)\tau]
+\end{align}
+$r$ times, with $r$ given by eq. \ref{eq:r_for_U_eta,a}. But each of these unitaries will have to be simulated, which can be done through known hamiltonian simulation techniques. With state-of-the-art techniques such as qubitisation \cite{}, one can simulate an operator exponential $\exp[-\i \mt H t]$ to error $\epsilon$ with $O(\|\mt H\| \> |t| + \log 1 / \epsilon)$ elementary gates, provided that $\mt H$ can be provided as a linear combination of unitaries. For the simulation error of a product of unitaries $\prod_{j=1}^r \tilde{\mt U}_j$ to be at most $\epsilon$, each unitary should be simulated with error at most $\epsilon / r$. Observing that $|\tau| \leq a$, $1 - \e^{\eta a} \leq 1$, $a = \tilde O(\eta^{-1})$ and $\eta \leq \Delta^{3/2}\epsilon^{1/2}\|\partial_\lambda \mt H\|_{\infty, 1}^{-1/2}$, we find the total complexity cost to simulate our channel to be
+\begin{align}
+    \text{complexity} &\leq r\Big[ 2 \> O\Big( a \max_{\lambda \in [\lambdai, \lambdaf]} \|\mt H(\lambda)\| + \log r / \epsilon) + O(\|\partial_\lambda \mt H\|_{\infty, 1} / \eta + \log r / \epsilon \Big) \Big] \nonumber \\[1mm]
+    &\leq \tilde O \bigg( \frac{\|\partial_\lambda \mt H\|_{\infty, 1}^2}{\eta^3 \epsilon} \> [\max_\lambda \|\mt H(\lambda)\| + \|\partial_\lambda \mt H\|_{\infty, 1}] \bigg) \nonumber \\[1mm]
+    &\leq \tilde O(\Delta^{-9/2} \> \epsilon^{-5/2} \> \|\partial_\lambda \mt H\|_{\infty, 1}^{7/2} \> [\max_\lambda \|\mt H(\lambda)\| + \|\partial_\lambda \mt H\|_{\infty, 1}] ).
+\end{align}
+\end{proof}

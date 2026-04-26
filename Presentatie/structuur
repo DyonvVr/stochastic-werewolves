@@ -1,0 +1,23 @@
+Inleiding
+- Belang van ASP
+- CD als alternatief voor ASP, als ``shortcut to adiabaticity''
+- Context waarin CD als relevant wordt gezien
+    - Hopelijk kortere fysieke tijd dus minder ruis
+    - Hopelijk betere complexiteit
+    - Meer artikelen lezen...
+- Het bepalen van A is moeilijk
+- Verschillende methoden
+    - Variationeel, met voorbeelden
+    - Commutatoransatz, Krylov-methoden
+- Deze methoden schalen over het algemeen met de dimensie van de Hilbertruimte...
+- Bovendien is de complexiteit van heuristieken niet voorspelbaar
+- Heeft ook te maken met gebrek aan gebruik van structuur
+- Hoe verhouden zich de moeilijkheid van ASP en CD eigenlijk? Deze vraag wordt niet echt behandeld
+- Complexiteit ASP, in kwantumpoorten
+- We presenteren een digitaal kwantumalgoritme voor CD
+- Hoofdresultaat: complexiteit
+- A tool central to the proof of this result is the regularised truncated AGP, which we discuss in section ...
+- The proof is given in section ...
+- In section ..., we give another algorithm ... which scales worse, but may be of independent interest.
+- In section ..., we discuss the implications of ... and conclude.
+
