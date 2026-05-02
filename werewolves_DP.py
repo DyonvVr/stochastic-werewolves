@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from scipy.integrate import odeint
 
 class WerewolvesDPSolver():
     def __init__(self, T_0, W_0) -> None:
@@ -71,7 +70,7 @@ class DPExperiment():
     def __init__(self) -> None:
         pass
 
-    def run_DP_experiment(self, plot_only):
+    def run(self, plot_only=False):
         if not plot_only:
             T_0s = list(range(4, 700, 2))
             res = []
@@ -83,9 +82,9 @@ class DPExperiment():
                     res.append([T_0, fair_w, win_p])
             
             res = np.array(res)
-            np.savetxt("res.csv", res, delimiter=",")
+            np.savetxt("res_DP.csv", res, delimiter=",")
 
-        res = pd.read_csv("res.csv", sep=",", header=None).values
+        res = pd.read_csv("res_DP.csv", sep=",", header=None).values
         w_max = np.max(res[:, 1])
 
         fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -105,69 +104,10 @@ class DPExperiment():
 
         plt.show()
         plt.savefig("res.png")
-
-
-class WerewolvesODESolver():
-    def __init__(self, T_0, delta_0) -> None:
-        self.T_0 = T_0
-        self.delta_0 = delta_0
-
-    def a(self, t):
-        return -1 / (self.T_0 - 2 * t - 1)
-    
-    def b(self, t):
-        return -1 - self.a(t)
-    
-    def solve(self, ts):
-        return odeint(lambda delta, t: self.a(t) * delta + self.b(t),
-                      self.delta_0, ts)
-    
-    def run_experiment(self):
-        ts = np.arange(0, self.T_0 // 2 - 1)
-        delta_means = self.solve(ts)
-        
-        fig, ax = plt.subplots()
-        ax.set_title("Expected delta approximation (T(0) = " + "{:.2e}".format(self.T_0) + ", W(0) = " + "{:.2e}".format((self.T_0 - self.delta_0) // 2) + ")")
-        ax.set_xlabel("t")
-        ax.set_ylabel("<delta(t)>")
-        ax.plot(ts, delta_means)
-        ax.plot(ts, np.zeros(len(delta_means)))
-        plt.show()
-
-
-class MonteCarloSolver:
-    def __init__(self, T_0, delta_0) -> None:
-        self.T_0 = T_0
-        self.delta_0 = delta_0
-
-    def p(self, delta: int, t: int) -> float:
-        return (0.5 * delta + 0.5 * self.T_0 - t - 1) / (self.T_0 - 2 * t - 1)
-    
-    # NOT FINISHED YET
-
-
-class ItoMonteCarloSolver:
-    def __init__(self, T_0, delta_0) -> None:
-        self.T_0 = T_0
-        self.delta_0 = delta_0
-
-    def p(self, delta: int, t: int) -> float:
-        return (0.5 * delta + 0.5 * self.T_0 - t - 1) / (self.T_0 - 2 * t - 1)
-
-    def run(self, n_samples, n_time_steps):
-        t_max = self.T_0 / 2
-        dt = t_max / n_time_steps
-        S = np.zeros((n_samples, n_time_steps + 1))
-        S[:, 0] = self.delta_0
-
-        # ...
-    
-    # NOT FINISHED YET
     
 
 def main() -> None:
-    T_0 = 1800000
-    delta_0 = 1200000
+    DPExperiment().run()
 
 if __name__ == "__main__":
     main()
